@@ -11,6 +11,7 @@ from middlewares import (
 )
 from resources import HealthCheckResource, SampleEntityResource
 from utils.logger import setup_logging
+from resources.cliente_resource import ClienteResource
 
 
 def create_app() -> FastAPI:
@@ -32,11 +33,17 @@ def create_app() -> FastAPI:
     # gerar sozinho umas páginas descrevendo a API, e aqui elas não
     # existem. Pra ver o que cada rota responde, mande uma requisição —
     # tem exemplo pronto de cada uma no README.
+
     application = FastAPI(
-        docs_url=None,
-        redoc_url=None,
-        openapi_url=None,
+        title="Sistema Bancário API",
+        description="API do Bootcamp QiTech"
     )
+
+#    application = FastAPI(
+#        docs_url=None,
+#        redoc_url=None,
+#        openapi_url=None,
+#    )
 
     # ────────────────────────────────────────────────────────────────
     # Os middlewares — e a ordem deles, que é regra e não gosto
@@ -159,6 +166,13 @@ def create_app() -> FastAPI:
     )
 
     register_error_handlers(application)
+    
+    cliente_resource = ClienteResource()
+    application.add_api_route(
+        "/clientes",
+        cliente_resource.on_post,
+        methods=["POST"],
+    )
 
     return application
 

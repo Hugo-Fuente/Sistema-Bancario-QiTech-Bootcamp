@@ -31,10 +31,7 @@ BANKSLIP_API_TIMEOUT = int(os.environ.get("BANKSLIP_API_TIMEOUT", "5"))
 # precisam responder pra quem ainda não tem token nenhum: a raiz, que
 # diz quem é este serviço, e o health check, que o Docker consulta pra
 # saber se a API já está de pé.
-BYPASS_ENDPOINTS = [
-    "/",
-    "/health_check",
-]
+BYPASS_ENDPOINTS = ["/", "/health_check", "/docs", "/openapi.json"]
 
 REQUIRED_VARIABLES = ["DATABASE_URL", "INTERNAL_TOKEN"]
 
