@@ -1,0 +1,9 @@
+{
+    "type": "object",
+    "properties": {
+        "nome": {"type": "string"},
+        "documento": {"type": "string"}
+    },
+    "required": ["nome", "documento"],
+    "additionalProperties": false
+}
