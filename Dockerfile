@@ -1,17 +1,26 @@
-# Estágio 1: Base
-FROM python:3.11-slim as base
+# Imagem oficial e publica do Python. Qualquer pessoa consegue baixar.
+FROM python:3.11-slim AS base
+
+# Roda a aplicacao com um usuario sem privilegios, nunca como root.
+RUN adduser --system --no-create-home user
+
+ENV VIRTUAL_ENV=/opt/venv
+RUN python3 -m venv "$VIRTUAL_ENV"
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+# Copiar so o requirements primeiro faz o Docker reaproveitar o cache:
+# enquanto as dependencias nao mudam, ele nao reinstala tudo de novo.
+COPY requirements.txt /requirements.txt
+RUN pip install --upgrade pip && pip install -r /requirements.txt
 
 WORKDIR /app
+COPY src /app
 
-# Copia apenas o arquivo de requisitos primeiro para otimizar o cache
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+FROM base AS api
+RUN chown -R user /app
+USER user
 
-# Estágio 2: API
-FROM base as api
+# --no-server-header: o uvicorn nao anuncia a propria versao, que e
+# informacao de menos pra quem procura uma versao com falha conhecida.
+CMD uvicorn app:app --host 0.0.0.0 --port 3000 --no-server-header
 
-# Copia o restante do código do projeto
-COPY . .
-
-# Inicia o servidor FastAPI usando o Uvicorn, apontando para src/app.py
-CMD ["uvicorn", "src.app:application", "--host", "0.0.0.0", "--port", "8000", "--reload"]
