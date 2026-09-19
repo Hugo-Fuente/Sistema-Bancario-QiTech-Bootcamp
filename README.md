@@ -14,9 +14,9 @@ A stack tecnológica do projeto está rigorosamente definida para garantir consi
 
 ## 👥 Equipe
 
-*   **[Seu Nome/Usuário]** - Configuração e Desenvolvimento
-*   **[Nome Colega 1]** - Desenvolvimento
-*   **[Nome Colega 2]** - Desenvolvimento
+*   **Hugo Gomes de La Fuente** - Configuração e Desenvolvimento
+*   **Mateus Carósio** - Desenvolvimento
+*   **Leandro Apolinário Leite** - Desenvolvimento
 
 ## ⚙️ Como Executar o Projeto (Localmente)
 
