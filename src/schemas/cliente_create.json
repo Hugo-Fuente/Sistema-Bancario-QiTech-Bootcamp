@@ -1,4 +1,5 @@
 {
+    "$comment": "AVISO PARA O MATEUS E LEANDRO: Podem apagar este arquivo. A validação foi migrada para 'post_cliente.json' para seguir o padrão de nomenclatura HTTP e as travas de limite de caracteres da arquitetura oficial da QI Tech.",
     "type": "object",
     "properties": {
         "nome": {"type": "string"},
