@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-
+from resources import HealthCheckResource, SampleEntityResource, CustomerResource
 from constants import check_variables
 from errors import register_error_handlers
 from errors.base_error import error_verification
@@ -11,7 +11,7 @@ from middlewares import (
 )
 from resources import HealthCheckResource, SampleEntityResource
 from utils.logger import setup_logging
-from resources.cliente_resource import ClienteResource
+from resources import HealthCheckResource, SampleEntityResource, CustomerResource
 
 
 def create_app() -> FastAPI:
@@ -166,11 +166,11 @@ def create_app() -> FastAPI:
     )
 
     register_error_handlers(application)
-    
-    cliente_resource = ClienteResource()
+
+    customer_resource = CustomerResource()
     application.add_api_route(
-        "/clientes",
-        cliente_resource.on_post,
+        "/customer",
+        customer_resource.on_post,
         methods=["POST"],
     )
 

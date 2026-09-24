@@ -1,4 +1,5 @@
 from errors import QIException
+from fastapi import status
 
 
 class NotFoundSampleEntity(QIException):
@@ -98,4 +99,14 @@ class InvalidBirthdate(QIException):
         http_status = 422
         description = f"The birthdate {birthdate} is not a real date."
         translation = "A data de nascimento informada não existe."
+        super().__init__(title, self.code, http_status, description, translation)
+
+class UnderageCustomer(QIException):
+    code = "QIT001008"
+
+    def __init__(self, age: int, minimum_age: int) -> None:
+        title = "Underage Customer"
+        http_status = 422
+        description = f"Customer is {age} years old. Minimum required age is {minimum_age}."
+        translation = f"O cliente deve ter pelo menos {minimum_age} anos."
         super().__init__(title, self.code, http_status, description, translation)
