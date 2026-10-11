@@ -9,9 +9,15 @@ from middlewares import (
     register_request_logger_middleware,
     register_session_manager_middleware,
 )
-from resources import HealthCheckResource, SampleEntityResource
+from resources import (
+    ContaResource,
+    EmpresaResource,
+    HealthCheckResource,
+    PagamentoProgramadoResource,
+    ResponsabilidadeResource,
+    TransacaoResource,
+)
 from utils.logger import setup_logging
-from resources.cliente_resource import ClienteResource
 
 
 def create_app() -> FastAPI:
@@ -130,49 +136,52 @@ def create_app() -> FastAPI:
     # se a coisa foi criada, agendada ou concluída. Esta lista diz QUEM
     # atende cada endereço, e mais nada.
     health_check_resource = HealthCheckResource()
-    sample_entity_resource = SampleEntityResource()
+    empresa_resource = EmpresaResource()
+    conta_resource = ContaResource()
+    transacao_resource = TransacaoResource()
+    responsabilidade_resource = ResponsabilidadeResource()
+    pagamento_resource = PagamentoProgramadoResource()
 
-    application.add_api_route("/", health_check_resource.on_get_home, methods=["GET"])
-    application.add_api_route(
-        "/health_check",
-        health_check_resource.on_get_health_check,
-        methods=["GET"]
-    )
+    # A tabela de endereços: QUEM atende cada rota. Caminhos no singular, como
+    # no base-service; ações sobre um recurso são sub-recursos (/aprovacao,
+    # /cancelamento, /execucao). Status e regra de negócio moram nas camadas
+    # de baixo — aqui só o mapa.
+    routes = [
+        ("/", health_check_resource.on_get_home, ["GET"]),
+        ("/health_check", health_check_resource.on_get_health_check, ["GET"]),
+        # empresa, sócios, governança
+        ("/empresa", empresa_resource.on_post, ["POST"]),
+        ("/empresa/{empresa_id}", empresa_resource.on_get, ["GET"]),
+        ("/empresa/{empresa_id}/socio/{empresa_socio_id}/permissao/{acao}", empresa_resource.on_put_permissao, ["PUT"]),
+        ("/empresa/{empresa_id}/socio/{empresa_socio_id}/permissao/{acao}", empresa_resource.on_delete_permissao, ["DELETE"]),
+        ("/empresa/{empresa_id}/regra_aprovacao", empresa_resource.on_put_regra, ["PUT"]),
+        ("/empresa/{empresa_id}/regra_aprovacao/{regra_id}", empresa_resource.on_delete_regra, ["DELETE"]),
+        # conta
+        ("/conta/{conta_id}", conta_resource.on_get, ["GET"]),
+        ("/conta/{conta_id}/status", conta_resource.on_patch_status, ["PATCH"]),
+        ("/conta/{conta_id}/extrato", conta_resource.on_get_extrato, ["GET"]),
+        ("/conta/{conta_id}/pagamento_programado", conta_resource.on_get_pagamentos, ["GET"]),
+        # responsabilidade, substituição, orçamento, reserva
+        ("/responsabilidade", responsabilidade_resource.on_post, ["POST"]),
+        ("/responsabilidade/{responsabilidade_id}", responsabilidade_resource.on_get, ["GET"]),
+        ("/responsabilidade/{responsabilidade_id}/substituicao", responsabilidade_resource.on_put_substituicao, ["PUT"]),
+        ("/responsabilidade/{responsabilidade_id}/orcamento/{competencia}", responsabilidade_resource.on_put_orcamento, ["PUT"]),
+        ("/movimento_reserva", responsabilidade_resource.on_post_movimento, ["POST"]),
+        ("/movimento_reserva/{movimento_id}/aprovacao", pagamento_resource.on_post_aprovacao_movimento, ["POST"]),
+        # transação
+        ("/transacao", transacao_resource.on_post, ["POST"]),
+        ("/transacao/{transacao_id}", transacao_resource.on_get, ["GET"]),
+        # pagamento programado
+        ("/pagamento_programado", pagamento_resource.on_post, ["POST"]),
+        ("/pagamento_programado/{pagamento_id}/aprovacao", pagamento_resource.on_post_aprovacao, ["POST"]),
+        ("/pagamento_programado/{pagamento_id}/cancelamento", pagamento_resource.on_post_cancelamento, ["POST"]),
+        ("/pagamento_programado/{pagamento_id}/execucao", pagamento_resource.on_post_execucao, ["POST"]),
+    ]
 
-    application.add_api_route(
-        "/sample_entity",
-        sample_entity_resource.on_post,
-        methods=["POST"],
-    )
-    application.add_api_route(
-        "/sample_entity/{sample_entity_key}",
-        sample_entity_resource.on_get_by_key,
-        methods=["GET"],
-    )
-    application.add_api_route(
-        "/sample_entity/{sample_entity_key}",
-        sample_entity_resource.on_put_by_key,
-        methods=["PUT"],
-    )
-    application.add_api_route(
-        "/webhook/sample_entity/{sample_entity_key}/increment_counter",
-        sample_entity_resource.on_put_increment_counter,
-        methods=["PUT"],
-    )
-    application.add_api_route(
-        "/sample_entities",
-        sample_entity_resource.on_get_list,
-        methods=["GET"],
-    )
+    for path, endpoint, methods in routes:
+        application.add_api_route(path, endpoint, methods=methods)
 
     register_error_handlers(application)
-    
-    cliente_resource = ClienteResource()
-    application.add_api_route(
-        "/clientes",
-        cliente_resource.on_post,
-        methods=["POST"],
-    )
 
     return application
 

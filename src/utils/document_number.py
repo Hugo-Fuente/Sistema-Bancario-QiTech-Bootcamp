@@ -62,3 +62,37 @@ def is_valid_cpf(document_number: str) -> bool:
             return False
 
     return True
+
+
+CNPJ_LENGTH = 14
+
+
+def only_digits(value: str) -> str:
+    """Tira máscara: '123.456.789-09' vira '12345678909'. É assim que CPF e
+    CNPJ são guardados e comparados — o formato com pontos é só de tela."""
+    return "".join(character for character in value if character.isdigit())
+
+
+def is_valid_cnpj(document_number: str) -> bool:
+    """Diz se um CNPJ existe de verdade (dígitos verificadores), não só se
+    tem a cara certa. Mesma ideia do CPF: os dois últimos dígitos são uma
+    conta feita sobre os anteriores, com pesos que decrescem de 9 a 2."""
+    digits = [int(character) for character in only_digits(document_number)]
+
+    if len(digits) != CNPJ_LENGTH:
+        return False
+
+    if len(set(digits)) == 1:
+        return False
+
+    for position in (12, 13):
+        weights = list(range(position - 7, 1, -1)) + list(range(9, 1, -1))
+        weights = weights[:position]
+        total = sum(digits[index] * weights[index] for index in range(position))
+        remainder = total % 11
+        expected_digit = 0 if remainder < 2 else 11 - remainder
+
+        if digits[position] != expected_digit:
+            return False
+
+    return True

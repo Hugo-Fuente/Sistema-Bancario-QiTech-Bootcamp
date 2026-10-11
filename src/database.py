@@ -101,7 +101,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from constants import DATABASE_URL
 
 
-engine = create_engine(DATABASE_URL, pool_size=5, pool_recycle=600, pool_pre_ping=True)
+engine = create_engine(DATABASE_URL, pool_size=10, max_overflow=30, pool_recycle=600, pool_pre_ping=True)
 
 SessionLocal = sessionmaker(bind=engine, autoflush=False)
 
