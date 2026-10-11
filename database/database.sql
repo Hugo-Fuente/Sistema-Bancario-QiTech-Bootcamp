@@ -121,6 +121,7 @@ INSERT INTO status (status_id, codigo, descricao) VALUES
 -- Uma empresa, uma conta (a UNIQUE em empresa_id é a regra desta entrega).
 CREATE SEQUENCE conta_numero_seq START 1000;
 
+
 CREATE TABLE conta (
     conta_id                     uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
     empresa_id                   uuid        NOT NULL REFERENCES empresa (empresa_id),
