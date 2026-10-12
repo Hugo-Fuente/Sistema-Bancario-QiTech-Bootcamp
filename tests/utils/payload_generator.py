@@ -5,45 +5,40 @@ from tests.utils.random_generator import RandomGenerator
 
 class PayloadGenerator:
     @staticmethod
-    def create_sample_entity_payload(
-        hello: str = None,
-        name: str = None,
-        email: str = None,
-        document_number: str = None,
-        birthdate: str = None,
-    ) -> dict:
-        """Um cadastro valido, com qualquer campo trocado a pedido.
-
-        Sem argumento nenhum o payload sai aleatorio no que precisa ser
-        unico (e-mail e CPF), pra que dois cadastros seguidos nao batam
-        na regra de duplicidade. Quem testa FILTRO precisa do contrario
-        disso: um valor conhecido, pra poder procurar por ele depois.
-        """
-        if hello is None:
-            hello = "world"
-
-        if name is None:
-            name = "Maria da Silva"
-
-        if email is None:
-            email = f"maria.silva.{uuid4()}@exemplo.com.br"
-
-        if document_number is None:
-            document_number = RandomGenerator.generate_cpf()
-
-        if birthdate is None:
-            birthdate = "1990-05-17"
-
-        payload = {
-            "hello": hello,
-            "name": name,
-            "email": email,
-            "document_number": document_number,
-            "birthdate": birthdate,
+    def socio(papel="SOCIO_ADMINISTRADOR", participacao_bp=5000, nome="Fulano") -> dict:
+        return {
+            "cpf": RandomGenerator.generate_cpf(),
+            "nome": nome,
+            "email": f"s{uuid4().hex[:8]}@exemplo.com.br",
+            "data_nascimento": "1988-04-02",
+            "papel": papel,
+            "participacao_bp": participacao_bp,
         }
-        return payload
 
     @staticmethod
-    def create_new_status_payload(new_status: str = None) -> dict:
-        payload = {"status": new_status}
-        return payload
+    def empresa(socios=None) -> dict:
+        if socios is None:
+            socios = [
+                PayloadGenerator.socio(nome="Joao", participacao_bp=5000),
+                PayloadGenerator.socio(nome="Maria", participacao_bp=3000),
+                PayloadGenerator.socio(papel="SOCIO", nome="Ana", participacao_bp=2000),
+            ]
+        return {
+            "cnpj": RandomGenerator.generate_cnpj(),
+            "razao_social": f"Empresa {uuid4().hex[:8]} LTDA",
+            "socios": socios,
+        }
+
+    @staticmethod
+    def pix_saida(conta_id, valor, chave="fornecedor@exemplo.com") -> dict:
+        return {"meio": "PIX", "valor_centavos": valor, "conta_origem_id": conta_id, "contraparte": {"chave": chave}}
+
+    @staticmethod
+    def pix_entrada(conta_id, valor, referencia=None) -> dict:
+        return {
+            "meio": "PIX",
+            "valor_centavos": valor,
+            "conta_destino_id": conta_id,
+            "contraparte": {"chave": "pagador"},
+            "referencia_externa": referencia or f"E-{uuid4().hex[:12]}",
+        }

@@ -10,7 +10,9 @@ def error_verification():
         class_name = _class[0]
         class_type = _class[1]
         is_custom_exception = False
-        if issubclass(class_type, QIException) and class_name != "QIException":
+        # As bases abstratas (ErroDeDominio e as famílias por status) não
+        # declaram `code`: só as classes concretas entram na checagem.
+        if issubclass(class_type, QIException) and class_name != "QIException" and hasattr(class_type, "code"):
             is_custom_exception = True
 
         if is_custom_exception:
