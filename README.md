@@ -16,19 +16,38 @@ docker compose up        # API em http://localhost:3000, banco PostgreSQL
 
 ## Testar
 
-Com a API de pé:
+Com a API de pé, pode executar os testes automatizados localmente. É recomendado o uso do Python 3.11.
 
+**Opção A: Localmente (Linux / Mac)**
 ```bash
-python3 -m venv .venv && . .venv/bin/activate
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements-dev.txt
 pytest -q
 ```
 
-Os testes falam com a API por HTTP e cobrem: cadastro, idempotência, saldo
-(total / reservado / comprometido), reservas, pagamento programado, aprovações
-e **concorrência** (dois Pix de R$ 80 com R$ 100 de saldo, transferências
-cruzadas sem deadlock, execução e cancelamento simultâneos, voto duplicado).
-`DbUtils.rollback()` recria o banco a partir de `database/database.sql`.
+**Opção B: Localmente (Windows PowerShell)**
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements-dev.txt
+pytest -q
+```
+
+**Opção C: Via Docker (À prova de falhas)**
+Caso enfrente erros de compilação de dependências locais (como falhas ao instalar o `psycopg2` no Windows), pode injetar e correr os testes diretamente no ambiente isolado do contentor:
+
+```bash
+# 1. Copie os ficheiros de dependências e a pasta de testes para o contentor
+docker cp requirements.txt sistema-bancario-qitech-bootcamp-api-1:/tmp/
+docker cp requirements-dev.txt sistema-bancario-qitech-bootcamp-api-1:/tmp/
+docker cp tests sistema-bancario-qitech-bootcamp-api-1:/tmp/
+
+# 2. Execute a instalação e os testes como root
+docker exec -u root -it sistema-bancario-qitech-bootcamp-api-1 sh -c "cp /tmp/requirements* . && cp -r /tmp/tests . && pip install -r requirements-dev.txt && export PYTHONPATH=/app:/app/src && pytest -q"
+```
+
+Os testes falam com a API por HTTP e cobrem: cadastro, idempotência, saldo (total / reservado / comprometido), reservas, pagamento programado, aprovações e **concorrência** (dois Pix de R$ 80 com R$ 100 de saldo, transferências cruzadas sem deadlock, execução e cancelamento simultâneos, voto duplicado). `DbUtils.rollback()` recria o banco a partir de `database/database.sql`.
 
 ## Autenticação
 

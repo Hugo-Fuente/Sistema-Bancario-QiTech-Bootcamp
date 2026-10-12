@@ -1,4 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
+from fastapi.security import APIKeyHeader
+
+# Isto avisa o Swagger que existe um cabeçalho global
+token_auth = APIKeyHeader(name="INTERNAL-TOKEN", auto_error=False)
 
 from constants import check_variables
 from errors import register_error_handlers
@@ -25,6 +29,7 @@ def create_app() -> FastAPI:
     application = FastAPI(
         title="Sistema Bancário API",
         description="API do Bootcamp QiTech",
+        dependencies=[Depends(token_auth)]
     )
 
     # O FastAPI executa os middlewares do último registrado para o primeiro.
